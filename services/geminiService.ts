@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 
 // Fix: Always use named parameter for apiKey and direct process.env.API_KEY access
@@ -37,8 +38,13 @@ export const generateItinerarySuggestions = async (destination: string, days: nu
       }
     });
 
-    // Fix: access text as a property, not a method, and trim it
-    const jsonStr = response.text.trim();
+    const text = response.text;
+    if (!text) {
+      console.error("Gemini returned an empty response.");
+      return null;
+    }
+
+    const jsonStr = text.trim();
     return JSON.parse(jsonStr);
   } catch (error) {
     console.error("Gemini Error:", error);
