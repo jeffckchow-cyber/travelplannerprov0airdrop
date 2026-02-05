@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { TripProvider } from './store';
 import { Layout } from './components/Layout';
@@ -16,7 +17,7 @@ const Main: React.FC = () => {
       case 'dashboard':
         return <Dashboard onNavigate={setActiveView} />;
       case 'itinerary':
-        return <TripDetail />;
+        return <TripDetail onBack={() => setActiveView('dashboard')} />;
       case 'budget':
         return <Budget />;
       case 'toolbox':

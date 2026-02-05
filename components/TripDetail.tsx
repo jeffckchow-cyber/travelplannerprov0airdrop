@@ -31,7 +31,11 @@ import { Budget } from './Budget';
 
 type SubTab = 'itinerary' | 'stay' | 'transport' | 'budget' | 'notes';
 
-export const TripDetail: React.FC = () => {
+interface TripDetailProps {
+  onBack?: () => void;
+}
+
+export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
   const { state, addActivity, updateActivity, deleteActivity, setActiveTrip, addStay, updateStay, deleteStay, addTransport, updateTransport, deleteTransport, updateNotes, updateTrip, deleteTrip } = useTrips();
   const trip = state.trips.find(t => t.id === state.activeTripId);
   
@@ -65,9 +69,6 @@ export const TripDetail: React.FC = () => {
     };
   };
 
-  /**
-   * Helper to extract place name from Google Maps URL or fallback to location name.
-   */
   const getMapPointName = (location: string, link?: string) => {
     if (!link) return location;
     try {
@@ -86,9 +87,6 @@ export const TripDetail: React.FC = () => {
     return location;
   };
 
-  /**
-   * Helper to get the correct transport icon
-   */
   const getTransportIcon = (type: TransportDetail['type'], size = 16) => {
     switch (type) {
       case 'Train': return <TrainFront size={size} />;
@@ -191,6 +189,11 @@ export const TripDetail: React.FC = () => {
     setIsModalOpen('transport');
   };
 
+  const handleBack = () => {
+    setActiveTrip(null);
+    if (onBack) onBack();
+  };
+
   const renderSubTabs = () => (
     <div className="flex justify-around bg-[#1C1C1E] border-b border-white/10 px-1 overflow-x-auto no-scrollbar">
       {(['itinerary', 'stay', 'transport', 'budget', 'notes'] as SubTab[]).map((tab) => (
@@ -221,8 +224,8 @@ export const TripDetail: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-[#1C1C1E] text-white overflow-hidden">
-      {/* BANNER SECTION */}
+    <div className="flex flex-col h-screen bg-[#1C1C1E] text-white overflow-y-auto no-scrollbar scroll-smooth">
+      {/* BANNER SECTION - SCROLLABLE */}
       <div className="shrink-0 relative group h-48 md:h-72 overflow-hidden bg-black">
         <img 
           src={trip.coverImage} 
@@ -234,7 +237,7 @@ export const TripDetail: React.FC = () => {
         
         <div className="absolute inset-0 p-4 flex flex-col justify-between pointer-events-none">
           <div className="flex justify-between items-center pointer-events-auto">
-            <button onClick={() => setActiveTrip(null)} className="p-2 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-black/60 transition-all">
+            <button onClick={handleBack} className="p-2 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-black/60 transition-all">
               <ChevronLeft size={20} />
             </button>
             <div className="flex gap-1.5">
@@ -267,17 +270,17 @@ export const TripDetail: React.FC = () => {
         </div>
       </div>
 
-      {/* HEADER SECTION */}
-      <div className="shrink-0 bg-[#1C1C1E] z-40 shadow-xl">
+      {/* STICKY HEADER SECTION - Groups tabs and calendar together */}
+      <div className="sticky top-0 z-40 bg-[#1C1C1E] shadow-2xl">
         {renderSubTabs()}
 
         {activeSubTab === 'itinerary' && (
-          <div className="px-3 py-2 flex gap-1.5 overflow-x-auto no-scrollbar scroll-smooth border-b border-white/5 bg-[#1C1C1E]">
+          <div className="px-3 py-2.5 flex gap-1.5 overflow-x-auto no-scrollbar scroll-smooth border-b border-white/5 bg-[#1C1C1E]">
             {trip.dailyItinerary.map((day, idx) => {
               const info = getDateInfo(day.date);
               const isActive = selectedDay === idx;
               return (
-                <button key={idx} onClick={() => setSelectedDay(idx)} className={`flex flex-col items-center justify-center min-w-[42px] h-[50px] rounded-[14px] transition-all shrink-0 border ${isActive ? 'bg-white border-white text-black shadow-lg scale-105' : 'bg-[#2C2C2E] border-white/5 text-white/30'}`}>
+                <button key={idx} onClick={() => setSelectedDay(idx)} className={`flex flex-col items-center justify-center min-w-[44px] h-[54px] rounded-[16px] transition-all shrink-0 border ${isActive ? 'bg-white border-white text-black shadow-xl scale-105' : 'bg-[#2C2C2E] border-white/5 text-white/30'}`}>
                   <span className={`text-[8px] font-black uppercase mb-0.5 ${isActive ? 'text-black/50' : ''}`}>{info.day}</span>
                   <span className="text-base font-black leading-none">{info.date}</span>
                 </button>
@@ -288,8 +291,7 @@ export const TripDetail: React.FC = () => {
       </div>
 
       {/* CONTENT AREA */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
-        <div className="p-4 max-w-2xl mx-auto pb-24">
+      <div className="flex-1 p-4 max-w-2xl mx-auto pb-24 w-full">
           
           {activeSubTab === 'itinerary' && (
             <div className="space-y-4">
@@ -519,7 +521,6 @@ export const TripDetail: React.FC = () => {
               <textarea className="w-full h-[350px] bg-[#2C2C2E] border border-white/5 rounded-[24px] p-5 outline-none focus:border-[#D4AF37] transition-all resize-none text-white/70 text-sm font-medium leading-relaxed" placeholder="Important addresses, packing lists..." value={trip.notes} onChange={(e) => updateNotes(trip.id, e.target.value)} />
             </div>
           )}
-        </div>
       </div>
 
       <AnimatePresence>
@@ -533,38 +534,41 @@ export const TripDetail: React.FC = () => {
                 <button onClick={() => setIsModalOpen(null)} className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-all"><X size={20} /></button>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4 pb-4">
                 {isModalOpen === 'activity' && (
                   <>
-                    <div className="flex gap-1.5 p-1 bg-[#1C1C1E] rounded-xl mb-1">
+                    <div className="flex gap-1.5 p-1 bg-[#1C1C1E] rounded-xl mb-1 overflow-x-auto no-scrollbar shrink-0">
                        {([ActivityType.FOOD, ActivityType.SIGHTSEEING, ActivityType.SHOPPING, ActivityType.OTHER] as ActivityType[]).map(type => (
-                         <button key={type} onClick={() => setNewActivity({...newActivity, type})} className={`flex-1 py-2 text-[10px] font-black rounded-lg transition-all ${newActivity.type === type ? 'bg-[#D4AF37] text-black shadow-md' : 'text-white/20 hover:text-white/40'}`}>{type.toUpperCase()}</button>
+                         <button key={type} onClick={() => setNewActivity({...newActivity, type})} className={`flex-1 py-2 px-3 text-[10px] font-black rounded-lg transition-all whitespace-nowrap ${newActivity.type === type ? 'bg-[#D4AF37] text-black shadow-md' : 'text-white/20 hover:text-white/40'}`}>{type.toUpperCase()}</button>
                        ))}
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <label className="text-[9px] font-black opacity-30 uppercase ml-2">Time</label>
-                        <input type="time" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={newActivity.time} onChange={e => setNewActivity({...newActivity, time: e.target.value})} />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[9px] font-black opacity-30 uppercase ml-2">Cost ($)</label>
-                        <input type="number" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="0" value={newActivity.cost || ''} onChange={e => setNewActivity({...newActivity, cost: Number(e.target.value)})} />
-                      </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black opacity-30 uppercase ml-2">Time</label>
+                      <input type="time" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={newActivity.time} onChange={e => setNewActivity({...newActivity, time: e.target.value})} />
                     </div>
+
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Destination Name</label>
                       <input type="text" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="e.g. Times Square" value={newActivity.location} onChange={e => setNewActivity({...newActivity, location: e.target.value})} />
                     </div>
+
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Google Maps Link</label>
                       <input type="url" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="https://goo.gl/maps/..." value={newActivity.mapLink} onChange={e => setNewActivity({...newActivity, mapLink: e.target.value})} />
                     </div>
+
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Additional Notes</label>
                       <textarea className="w-full bg-[#1C1C1E] rounded-xl p-4 h-24 text-sm font-medium resize-none border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="Important details, tips, etc..." value={newActivity.note} onChange={e => setNewActivity({...newActivity, note: e.target.value})} />
                     </div>
                     
-                    {/* ATTACHMENT SECTION - ITINERARY */}
+                    {/* COST FIELD AT BOTTOM PER REQUEST */}
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black opacity-30 uppercase ml-2">Cost ($)</label>
+                      <input type="number" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="0" value={newActivity.cost || ''} onChange={e => setNewActivity({...newActivity, cost: Number(e.target.value)})} />
+                    </div>
+
                     <div className="pt-3 border-t border-white/10">
                       <div className="flex justify-between items-center mb-3">
                         <h4 className="text-[9px] font-black opacity-30 uppercase">Attachments</h4>
@@ -580,7 +584,7 @@ export const TripDetail: React.FC = () => {
                       </div>
                     </div>
 
-                    <button onClick={() => { editingItem ? updateActivity(trip.id, selectedDay, {...newActivity as Activity, attachments}) : addActivity(trip.id, selectedDay, {...newActivity as any, attachments}); setIsModalOpen(null); }} className="w-full py-4 bg-[#D4AF37] text-black rounded-[20px] font-black shadow-xl text-sm uppercase">SAVE</button>
+                    <button onClick={() => { editingItem ? updateActivity(trip.id, selectedDay, {...newActivity as Activity, attachments}) : addActivity(trip.id, selectedDay, {...newActivity as any, attachments}); setIsModalOpen(null); }} className="w-full py-4 bg-[#D4AF37] text-black rounded-[20px] font-black shadow-xl text-sm uppercase mt-4">SAVE</button>
                   </>
                 )}
 
@@ -598,13 +602,12 @@ export const TripDetail: React.FC = () => {
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Google Maps Link</label>
                       <input type="url" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="https://goo.gl/maps/..." value={newStay.mapLink} onChange={e => setNewStay({...newStay, mapLink: e.target.value})} />
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div><label className="text-[8px] font-black opacity-30 uppercase ml-2 mb-0.5 block">Check-in</label><input type="date" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={newStay.checkIn} onChange={e => setNewStay({...newStay, checkIn: e.target.value})} /></div>
-                      <div><label className="text-[8px] font-black opacity-30 uppercase ml-2 mb-0.5 block">Check-out</label><input type="date" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={newStay.checkOut} onChange={e => setNewStay({...newStay, checkOut: e.target.value})} /></div>
+                    <div className="flex flex-col gap-4">
+                      <div><label className="text-[8px] font-black opacity-30 uppercase ml-2 mb-1 block">Check-in Date</label><input type="date" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={newStay.checkIn} onChange={e => setNewStay({...newStay, checkIn: e.target.value})} /></div>
+                      <div><label className="text-[8px] font-black opacity-30 uppercase ml-2 mb-1 block">Check-out Date</label><input type="date" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={newStay.checkOut} onChange={e => setNewStay({...newStay, checkOut: e.target.value})} /></div>
                     </div>
 
-                    {/* ATTACHMENT SECTION - STAY */}
-                    <div className="pt-3 border-t border-white/10">
+                    <div className="pt-3 border-t border-white/10 mt-4">
                       <div className="flex justify-between items-center mb-3">
                         <h4 className="text-[9px] font-black opacity-30 uppercase">Attachments</h4>
                         <label className="flex items-center gap-1.5 cursor-pointer bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg text-[10px] font-bold border border-white/5"><Plus size={12} /> Add<input type="file" className="hidden" onChange={handleFileUpload} /></label>
@@ -619,22 +622,22 @@ export const TripDetail: React.FC = () => {
                       </div>
                     </div>
 
-                    <button onClick={() => { editingItem ? updateStay(trip.id, {...newStay as Stay, attachments}) : addStay(trip.id, {...newStay as any, attachments}); setIsModalOpen(null); }} className="w-full py-4 bg-[#D4AF37] text-black rounded-[20px] font-black shadow-xl uppercase">SAVE</button>
+                    <button onClick={() => { editingItem ? updateStay(trip.id, {...newStay as Stay, attachments}) : addStay(trip.id, {...newStay as any, attachments}); setIsModalOpen(null); }} className="w-full py-4 bg-[#D4AF37] text-black rounded-[20px] font-black shadow-xl uppercase mt-4">SAVE</button>
                   </>
                 )}
 
                 {isModalOpen === 'transport' && (
                   <>
-                    <div className="flex gap-1.5 p-1 bg-[#1C1C1E] rounded-xl mb-1">
+                    <div className="flex gap-1.5 p-1 bg-[#1C1C1E] rounded-xl mb-1 overflow-x-auto no-scrollbar shrink-0">
                        {(['Flight', 'Train', 'Bus', 'Rental Car'] as TransportDetail['type'][]).map(type => (
-                         <button key={type} onClick={() => setNewTransport({...newTransport, type})} className={`flex-1 py-2 text-[10px] font-black rounded-lg transition-all ${newTransport.type === type ? 'bg-[#D4AF37] text-black shadow-md' : 'text-white/20 hover:text-white/40'}`}>{type.toUpperCase()}</button>
+                         <button key={type} onClick={() => setNewTransport({...newTransport, type})} className={`flex-1 py-2 px-3 text-[10px] font-black rounded-lg transition-all whitespace-nowrap ${newTransport.type === type ? 'bg-[#D4AF37] text-black shadow-md' : 'text-white/20 hover:text-white/40'}`}>{type.toUpperCase()}</button>
                        ))}
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Flight / Transit ID</label>
                       <input type="text" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="e.g. DL123" value={newTransport.flightNo} onChange={e => setNewTransport({...newTransport, flightNo: e.target.value})} />
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-4">
                       <div className="space-y-1">
                         <label className="text-[9px] font-black opacity-30 uppercase ml-2">Departure Point</label>
                         <input type="text" className="bg-[#1C1C1E] rounded-xl p-4 w-full text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="From (e.g. SFO)" value={newTransport.from} onChange={e => setNewTransport({...newTransport, from: e.target.value})} />
@@ -644,22 +647,27 @@ export const TripDetail: React.FC = () => {
                         <input type="text" className="bg-[#1C1C1E] rounded-xl p-4 w-full text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="To (e.g. JFK)" value={newTransport.to} onChange={e => setNewTransport({...newTransport, to: e.target.value})} />
                       </div>
                     </div>
-                    <div className="p-4 bg-[#1C1C1E] rounded-[24px] space-y-4 border border-white/5">
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-[8px] font-black opacity-30 uppercase ml-2 block">Departure</label>
-                          <input type="date" className="bg-[#2C2C2E] rounded-lg p-3 text-sm font-bold w-full border-none mb-1 outline-none" value={newTransport.departureDate} onChange={e => setNewTransport({...newTransport, departureDate: e.target.value})} />
-                          <input type="time" className="bg-[#2C2C2E] rounded-lg p-3 text-sm font-bold w-full border-none outline-none" value={newTransport.departureTime} onChange={e => setNewTransport({...newTransport, departureTime: e.target.value})} />
+                    
+                    {/* Fixed Transport Layout for iPhone - Stacked vertically */}
+                    <div className="p-5 bg-[#1C1C1E] rounded-[24px] space-y-6 border border-white/5 mt-2">
+                      <div className="space-y-3">
+                        <label className="text-[8px] font-black opacity-30 uppercase ml-2 block">Departure Date & Time</label>
+                        <div className="flex flex-col gap-2">
+                          <input type="date" className="bg-[#2C2C2E] rounded-xl p-3 text-sm font-bold w-full border-none outline-none" value={newTransport.departureDate} onChange={e => setNewTransport({...newTransport, departureDate: e.target.value})} />
+                          <input type="time" className="bg-[#2C2C2E] rounded-xl p-3 text-sm font-bold w-full border-none outline-none" value={newTransport.departureTime} onChange={e => setNewTransport({...newTransport, departureTime: e.target.value})} />
                         </div>
-                        <div>
-                          <label className="text-[8px] font-black opacity-30 uppercase ml-2 block">Arrival</label>
-                          <input type="date" className="bg-[#2C2C2E] rounded-lg p-3 text-sm font-bold w-full border-none mb-1 outline-none" value={newTransport.arrivalDate} onChange={e => setNewTransport({...newTransport, arrivalDate: e.target.value})} />
-                          <input type="time" className="bg-[#2C2C2E] rounded-lg p-3 text-sm font-bold w-full border-none outline-none" value={newTransport.arrivalTime} onChange={e => setNewTransport({...newTransport, arrivalTime: e.target.value})} />
+                      </div>
+                      
+                      <div className="w-full border-t border-white/5 pt-4 space-y-3">
+                        <label className="text-[8px] font-black opacity-30 uppercase ml-2 block">Arrival Date & Time</label>
+                        <div className="flex flex-col gap-2">
+                          <input type="date" className="bg-[#2C2C2E] rounded-xl p-3 text-sm font-bold w-full border-none outline-none" value={newTransport.arrivalDate} onChange={e => setNewTransport({...newTransport, arrivalDate: e.target.value})} />
+                          <input type="time" className="bg-[#2C2C2E] rounded-xl p-3 text-sm font-bold w-full border-none outline-none" value={newTransport.arrivalTime} onChange={e => setNewTransport({...newTransport, arrivalTime: e.target.value})} />
                         </div>
                       </div>
                     </div>
-                    {/* ATTACHMENT SECTION - TRANSPORT */}
-                    <div className="pt-3 border-t border-white/10">
+
+                    <div className="pt-3 border-t border-white/10 mt-4">
                       <div className="flex justify-between items-center mb-3">
                         <h4 className="text-[9px] font-black opacity-30 uppercase">Attachments</h4>
                         <label className="flex items-center gap-1.5 cursor-pointer bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg text-[10px] font-bold border border-white/5"><Plus size={12} /> Add<input type="file" className="hidden" onChange={handleFileUpload} /></label>
@@ -673,7 +681,7 @@ export const TripDetail: React.FC = () => {
                         ))}
                       </div>
                     </div>
-                    <button onClick={() => { editingItem ? updateTransport(trip.id, {...newTransport as TransportDetail, attachments}) : addTransport(trip.id, {...newTransport as any, attachments}); setIsModalOpen(null); }} className="w-full py-4 bg-[#D4AF37] text-black rounded-[20px] font-black shadow-xl uppercase">SAVE</button>
+                    <button onClick={() => { editingItem ? updateTransport(trip.id, {...newTransport as TransportDetail, attachments}) : addTransport(trip.id, {...newTransport as any, attachments}); setIsModalOpen(null); }} className="w-full py-4 bg-[#D4AF37] text-black rounded-[20px] font-black shadow-xl uppercase mt-4">SAVE</button>
                   </>
                 )}
 
@@ -688,7 +696,7 @@ export const TripDetail: React.FC = () => {
                       <input type="range" min="0" max="100" className="w-full h-1 bg-[#2C2C2E] rounded-lg appearance-none cursor-pointer accent-[#D4AF37]" value={editTripData.bannerPosition} onChange={e => setEditTripData({...editTripData, bannerPosition: Number(e.target.value)})} />
                       <p className="text-[8px] text-white/20 text-center mt-1">Slide to adjust vertical framing</p>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-4">
                         <div className="space-y-1">
                             <label className="text-[9px] font-black opacity-30 uppercase ml-3 tracking-[0.2em]">Start Date</label>
                             <input type="date" className="w-full bg-[#1C1C1E] rounded-[16px] p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={editTripData.startDate} onChange={e => setEditTripData({...editTripData, startDate: e.target.value})} />
@@ -700,7 +708,7 @@ export const TripDetail: React.FC = () => {
                     </div>
                     <div className="pt-4 border-t border-white/5 space-y-3">
                       <button onClick={() => { updateTrip(trip.id, editTripData); setIsModalOpen(null); }} className="w-full py-4 bg-[#D4AF37] text-black rounded-[20px] font-black shadow-xl tracking-widest text-xs uppercase">SAVE</button>
-                      <button onClick={() => { if(confirm('Erase this entire adventure?')) { setActiveTrip(null); deleteTrip(trip.id); }}} className="w-full py-2 text-red-500 font-bold text-[9px] uppercase tracking-[0.2em] opacity-30 hover:opacity-100 transition-opacity">Delete Journey</button>
+                      <button onClick={() => { if(confirm('Erase this entire adventure?')) { handleBack(); deleteTrip(trip.id); }}} className="w-full py-2 text-red-500 font-bold text-[9px] uppercase tracking-[0.2em] opacity-30 hover:opacity-100 transition-opacity">Delete Journey</button>
                     </div>
                   </div>
                 )}
