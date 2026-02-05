@@ -75,7 +75,6 @@ export const Dashboard: React.FC<{ onNavigate: (view: 'itinerary') => void }> = 
       }
     };
     reader.readAsText(file);
-    // Reset input
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -97,14 +96,14 @@ export const Dashboard: React.FC<{ onNavigate: (view: 'itinerary') => void }> = 
           <button 
             onClick={() => fileInputRef.current?.click()}
             className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
-            title="Import Journey (.json)"
+            title="Import Journey"
           >
             <Upload size={16} /> Import
           </button>
           <button 
             onClick={handleExportAll}
             className="flex items-center gap-2 px-4 py-2 bg-[#D4AF37]/10 text-[#D4AF37] hover:bg-[#D4AF37]/20 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
-            title="Export All Data"
+            title="Backup All"
           >
             <Download size={16} /> Backup
           </button>
@@ -130,14 +129,12 @@ export const Dashboard: React.FC<{ onNavigate: (view: 'itinerary') => void }> = 
                   <button 
                     onClick={(e) => { e.stopPropagation(); handleExportTrip(trip); }}
                     className="p-2 bg-black/40 backdrop-blur-md text-[#D4AF37] rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/60"
-                    title="Export / Share Journey"
                   >
                     <Share2 size={16} />
                   </button>
                   <button 
                     onClick={(e) => { e.stopPropagation(); deleteTrip(trip.id); }}
                     className="p-2 bg-red-500/20 text-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/40"
-                    title="Delete Journey"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -189,7 +186,7 @@ export const Dashboard: React.FC<{ onNavigate: (view: 'itinerary') => void }> = 
                   value={formData.title} 
                   onChange={e => setFormData({ ...formData, title: e.target.value })}
                   placeholder="e.g. US 2026 Road Trip" 
-                  className="w-full bg-[#3A3A3C] border border-[#48484A] rounded-xl px-4 py-3 focus:border-[#D4AF37] outline-none text-white"
+                  className="w-full bg-[#3A3A3C] border border-[#48484A] rounded-xl px-4 py-3 focus:border-[#D4AF37] outline-none text-white text-base"
                   required
                 />
               </div>
@@ -200,7 +197,7 @@ export const Dashboard: React.FC<{ onNavigate: (view: 'itinerary') => void }> = 
                     type="date" 
                     value={formData.startDate} 
                     onChange={e => setFormData({ ...formData, startDate: e.target.value })}
-                    className="w-full bg-[#3A3A3C] border border-[#48484A] rounded-xl px-4 py-3 focus:border-[#D4AF37] outline-none text-white"
+                    className="w-full bg-[#3A3A3C] border border-[#48484A] rounded-xl px-4 py-3 focus:border-[#D4AF37] outline-none text-white text-base"
                     required
                   />
                 </div>
@@ -210,7 +207,7 @@ export const Dashboard: React.FC<{ onNavigate: (view: 'itinerary') => void }> = 
                     type="date" 
                     value={formData.endDate} 
                     onChange={e => setFormData({ ...formData, endDate: e.target.value })}
-                    className="w-full bg-[#3A3A3C] border border-[#48484A] rounded-xl px-4 py-3 focus:border-[#D4AF37] outline-none text-white"
+                    className="w-full bg-[#3A3A3C] border border-[#48484A] rounded-xl px-4 py-3 focus:border-[#D4AF37] outline-none text-white text-base"
                     required
                   />
                 </div>
@@ -222,7 +219,7 @@ export const Dashboard: React.FC<{ onNavigate: (view: 'itinerary') => void }> = 
                   value={formData.coverImage} 
                   onChange={e => setFormData({ ...formData, coverImage: e.target.value })}
                   placeholder="https://..." 
-                  className="w-full bg-[#3A3A3C] border border-[#48484A] rounded-xl px-4 py-3 focus:border-[#D4AF37] outline-none text-white"
+                  className="w-full bg-[#3A3A3C] border border-[#48484A] rounded-xl px-4 py-3 focus:border-[#D4AF37] outline-none text-white text-base"
                 />
               </div>
               <div className="flex gap-4 pt-4">

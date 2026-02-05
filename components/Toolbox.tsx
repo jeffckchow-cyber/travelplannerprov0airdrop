@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   CheckCircle2, 
@@ -39,7 +40,7 @@ export const Toolbox: React.FC = () => {
 
   const [usd, setUsd] = useState('100');
   const [eur, setEur] = useState('');
-  const [rate] = useState(0.92); // Hardcoded rate USD -> EUR
+  const [rate] = useState(0.92);
   const [newItem, setNewItem] = useState('');
 
   useEffect(() => {
@@ -98,7 +99,7 @@ export const Toolbox: React.FC = () => {
                 }`}
               >
                 {item.completed ? <CheckCircle2 className="text-[#D4AF37]" size={20} /> : <Circle className="text-white/10" size={20} />}
-                <span className={`font-bold text-sm ${item.completed ? 'line-through' : ''}`}>{item.item}</span>
+                <span className={`font-bold text-base ${item.completed ? 'line-through' : ''}`}>{item.item}</span>
               </button>
             ))}
           </div>
@@ -112,7 +113,7 @@ export const Toolbox: React.FC = () => {
               value={newItem}
               onChange={e => setNewItem(e.target.value)}
               placeholder="Add personal item..."
-              className="flex-1 bg-[#1C1C1E] border border-white/5 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-[#D4AF37] transition-colors"
+              className="flex-1 bg-[#1C1C1E] border border-white/5 rounded-xl px-4 py-3 text-base font-bold outline-none focus:border-[#D4AF37] transition-colors"
             />
             <button type="submit" className="w-12 h-12 bg-[#D4AF37] text-black rounded-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
               <Plus size={24} />
@@ -138,7 +139,7 @@ export const Toolbox: React.FC = () => {
                   type="number" 
                   value={usd}
                   onChange={e => setUsd(e.target.value)}
-                  className="w-full bg-transparent text-3xl font-black outline-none"
+                  className="w-full bg-transparent text-3xl font-black outline-none text-base"
                 />
               </div>
 
@@ -157,7 +158,7 @@ export const Toolbox: React.FC = () => {
                   type="number" 
                   value={eur}
                   onChange={e => handleEurChange(e.target.value)}
-                  className="w-full bg-transparent text-3xl font-black outline-none"
+                  className="w-full bg-transparent text-3xl font-black outline-none text-base"
                 />
               </div>
 

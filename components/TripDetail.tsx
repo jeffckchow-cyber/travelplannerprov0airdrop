@@ -13,16 +13,16 @@ import {
   MapPin,
   ArrowRight,
   Paperclip,
-  Download,
   X,
-  ExternalLink,
   Settings,
   Clock,
   Camera,
   Eye,
-  Maximize2,
   Navigation,
-  Share2
+  Share2,
+  FileText,
+  Edit3,
+  ExternalLink
 } from 'lucide-react';
 import { useTrips } from '../store';
 import { ACTIVITY_CONFIG } from '../constants';
@@ -42,6 +42,8 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
   const [activeSubTab, setActiveSubTab] = useState<SubTab>('itinerary');
   const [selectedDay, setSelectedDay] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState<'activity' | 'stay' | 'transport' | 'settings' | null>(null);
+  const [viewingAttachment, setViewingAttachment] = useState<Attachment | null>(null);
+  const [isEditingNotes, setIsEditingNotes] = useState(false);
 
   // Edit states
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -131,21 +133,7 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
   };
 
   const viewAttachment = (att: Attachment) => {
-    const win = window.open();
-    if (win) {
-      win.document.write(`
-        <html>
-          <head><title>${att.name}</title></head>
-          <body style="margin:0; display:flex; justify-content:center; align-items:center; background:#1c1c1e; height:100vh;">
-            ${att.type.startsWith('image/') 
-              ? `<img src="${att.data}" style="max-width:100%; max-height:100%; object-fit:contain;"/>`
-              : `<iframe src="${att.data}" frameborder="0" style="width:100%; height:100%;"></iframe>`
-            }
-          </body>
-        </html>
-      `);
-      win.document.close();
-    }
+    setViewingAttachment(att);
   };
 
   const removeAttachment = (id: string) => setAttachments(prev => prev.filter(a => a.id !== id));
@@ -223,9 +211,42 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
     }
   };
 
+  const renderAttachmentPreviews = (items?: Attachment[]) => {
+    if (!items || items.length === 0) return null;
+    return (
+      <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-white/5">
+        {items.map(att => (
+          <button 
+            key={att.id} 
+            onClick={(e) => { e.stopPropagation(); viewAttachment(att); }}
+            className="flex items-center gap-1.5 bg-black/30 border border-white/5 px-2 py-1 rounded-md text-[8px] font-bold text-white/60 hover:text-[#D4AF37] hover:border-[#D4AF37]/30 transition-all"
+          >
+            <Eye size={8} /> {att.name.length > 12 ? att.name.slice(0, 10) + '...' : att.name}
+          </button>
+        ))}
+      </div>
+    );
+  };
+
+  // Helper to render text with clickable links
+  const renderLinkifiedText = (text: string) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+    return parts.map((part, i) => {
+      if (part.match(urlRegex)) {
+        return (
+          <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-[#D4AF37] underline inline-flex items-center gap-1">
+            {part} <ExternalLink size={10} />
+          </a>
+        );
+      }
+      return part;
+    });
+  };
+
   return (
     <div className="flex flex-col h-screen bg-[#1C1C1E] text-white overflow-y-auto no-scrollbar scroll-smooth">
-      {/* BANNER SECTION - SCROLLABLE */}
+      {/* BANNER SECTION */}
       <div className="shrink-0 relative group h-48 md:h-72 overflow-hidden bg-black">
         <img 
           src={trip.coverImage} 
@@ -248,7 +269,7 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                 <button 
                   onClick={handleExportTrip} 
                   className="p-2 bg-black/40 backdrop-blur-md rounded-full text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black transition-all"
-                  title="Share Journey (Export JSON)"
+                  title="Share Journey"
                 >
                     <Share2 size={18} />
                 </button>
@@ -270,7 +291,7 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
         </div>
       </div>
 
-      {/* STICKY HEADER SECTION - Groups tabs and calendar together */}
+      {/* STICKY HEADER SECTION */}
       <div className="sticky top-0 z-40 bg-[#1C1C1E] shadow-2xl">
         {renderSubTabs()}
 
@@ -292,7 +313,6 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
 
       {/* CONTENT AREA */}
       <div className="flex-1 p-4 max-w-2xl mx-auto pb-24 w-full">
-          
           {activeSubTab === 'itinerary' && (
             <div className="space-y-4">
               <div className="flex justify-between items-center mb-1">
@@ -340,13 +360,7 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                               </div>
                           </div>
                       </div>
-                      {t.attachments && t.attachments.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-3">
-                          {t.attachments.map(att => (
-                            <button key={att.id} onClick={(e) => { e.stopPropagation(); viewAttachment(att); }} className="bg-black/20 px-2 py-1 rounded-md text-[8px] flex items-center gap-1 opacity-50 hover:opacity-100"><Paperclip size={8} /> {att.name.slice(0, 10)}...</button>
-                          ))}
-                        </div>
-                      )}
+                      {renderAttachmentPreviews(t.attachments)}
                    </div>
                 ))}
 
@@ -368,13 +382,7 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                         <button onClick={(e) => { e.stopPropagation(); deleteStay(trip.id, stay.id); }} className="p-1.5 bg-red-500/5 text-red-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all"><Trash2 size={14} /></button>
                       </div>
                     </div>
-                    {stay.attachments && stay.attachments.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-3 pt-3 border-t border-white/5">
-                        {stay.attachments.map(att => (
-                          <button key={att.id} onClick={(e) => { e.stopPropagation(); viewAttachment(att); }} className="bg-black/20 px-2 py-1 rounded-md text-[8px] flex items-center gap-1 opacity-50 hover:opacity-100"><Paperclip size={8} /> {att.name.slice(0, 10)}...</button>
-                        ))}
-                      </div>
-                    )}
+                    {renderAttachmentPreviews(stay.attachments)}
                   </div>
                 ))}
 
@@ -399,25 +407,15 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                             </div>
                             <h4 className="text-lg font-black mb-0.5">{act.location}</h4>
                             <p className="text-xs opacity-40 font-medium leading-relaxed line-clamp-2">{act.note}</p>
-                            {act.attachments && act.attachments.length > 0 && (
-                               <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-white/5">
-                                  {act.attachments.map(att => (
-                                      <button key={att.id} onClick={e => { e.stopPropagation(); viewAttachment(att); }} className="flex items-center gap-1 bg-black/30 border border-white/5 px-2 py-0.5 rounded-md text-[8px] font-bold text-white/60 hover:text-[#D4AF37]">
-                                          <Eye size={8} /> {att.name.slice(0, 10)}...
-                                      </button>
-                                  ))}
-                               </div>
-                            )}
+                            {renderAttachmentPreviews(act.attachments)}
                           </div>
                         </div>
 
                         {/* DIRECTIONS BUBBLE */}
                         {nextAct && (
                           <div className="relative py-2 -my-2 flex items-center -ml-[21px] group/dir">
-                            {/* Visual connector */}
                             <div className="absolute left-[5.5px] top-0 bottom-0 w-[1px] bg-white/10" />
                             <div className="absolute left-0 w-3 h-3 rounded-full border-[3px] border-[#1C1C1E] bg-[#D4AF37] z-10 scale-75 group-hover/dir:scale-100 transition-transform" />
-                            
                             <a 
                               href={`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(getMapPointName(act.location, act.mapLink))}&destination=${encodeURIComponent(getMapPointName(nextAct.location, nextAct.mapLink))}`}
                               target="_blank"
@@ -454,16 +452,11 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                         {stay.mapLink && (
                           <a href={stay.mapLink} target="_blank" rel="noopener" onClick={e => e.stopPropagation()} className="p-2 text-[#D4AF37] hover:scale-110 transition-all opacity-0 group-hover:opacity-100"><MapPin size={18} /></a>
                         )}
+                        {/* Fix: stayId was not defined, use stay.id. Corrected syntax error by removing the malformed ternary. */}
                         <button onClick={(e) => { e.stopPropagation(); deleteStay(trip.id, stay.id); }} className="p-2 text-red-500/20 text-red-500 rounded-lg opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
                      </div>
                    </div>
-                   {stay.attachments && stay.attachments.length > 0 && (
-                     <div className="flex gap-2 flex-wrap">
-                        {stay.attachments.map(att => (
-                           <button key={att.id} onClick={e => { e.stopPropagation(); viewAttachment(att); }} className="text-[8px] bg-black/20 px-2 py-1 rounded-md opacity-40 flex items-center gap-1 hover:opacity-100"><Paperclip size={8} /> {att.name.slice(0, 15)}...</button>
-                        ))}
-                     </div>
-                   )}
+                   {renderAttachmentPreviews(stay.attachments)}
                  </div>
                ))}
              </div>
@@ -501,13 +494,7 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                             </div>
                         </div>
                     </div>
-                    {t.attachments && t.attachments.length > 0 && (
-                      <div className="flex gap-1 mt-3 flex-wrap">
-                        {t.attachments.map(att => (
-                          <button key={att.id} onClick={e => { e.stopPropagation(); viewAttachment(att); }} className="text-[8px] bg-black/20 px-2 py-1 rounded-md opacity-40 flex items-center gap-1 hover:opacity-100"><Paperclip size={8} /> {att.name.slice(0, 15)}...</button>
-                        ))}
-                      </div>
-                    )}
+                    {renderAttachmentPreviews(t.attachments)}
                  </div>
                ))}
             </div>
@@ -516,9 +503,32 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
           {activeSubTab === 'budget' && <Budget />}
           
           {activeSubTab === 'notes' && (
-            <div className="space-y-3">
-              <h3 className="text-2xl font-black uppercase tracking-tight">Trip Notes</h3>
-              <textarea className="w-full h-[350px] bg-[#2C2C2E] border border-white/5 rounded-[24px] p-5 outline-none focus:border-[#D4AF37] transition-all resize-none text-white/70 text-sm font-medium leading-relaxed" placeholder="Important addresses, packing lists..." value={trip.notes} onChange={(e) => updateNotes(trip.id, e.target.value)} />
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-2xl font-black uppercase tracking-tight">Trip Notes</h3>
+                <button 
+                  onClick={() => setIsEditingNotes(!isEditingNotes)} 
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl font-black text-[10px] tracking-widest transition-all ${isEditingNotes ? 'bg-white text-black' : 'bg-[#D4AF37] text-black shadow-lg shadow-[#D4AF37]/20'}`}
+                >
+                  {isEditingNotes ? <><Eye size={14} /> VIEW MODE</> : <><Edit3 size={14} /> EDIT MODE</>}
+                </button>
+              </div>
+              
+              <div className="relative min-h-[400px]">
+                {isEditingNotes ? (
+                  <textarea 
+                    autoFocus
+                    className="w-full h-[400px] bg-[#2C2C2E] border border-[#D4AF37]/30 rounded-[24px] p-6 outline-none focus:border-[#D4AF37] transition-all resize-none text-white text-base font-medium leading-relaxed shadow-inner" 
+                    placeholder="Enter addresses, packing lists, or links (https://...)" 
+                    value={trip.notes} 
+                    onChange={(e) => updateNotes(trip.id, e.target.value)} 
+                  />
+                ) : (
+                  <div className="w-full min-h-[400px] bg-[#2C2C2E] border border-white/5 rounded-[24px] p-6 text-white/80 text-base font-medium leading-relaxed whitespace-pre-wrap">
+                    {trip.notes ? renderLinkifiedText(trip.notes) : <span className="opacity-30 italic">No notes added. Switch to Edit Mode to start writing.</span>}
+                  </div>
+                )}
+              </div>
             </div>
           )}
       </div>
@@ -545,28 +555,27 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
 
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Time</label>
-                      <input type="time" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={newActivity.time} onChange={e => setNewActivity({...newActivity, time: e.target.value})} />
+                      <input type="time" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={newActivity.time} onChange={e => setNewActivity({...newActivity, time: e.target.value})} />
                     </div>
 
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Destination Name</label>
-                      <input type="text" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="e.g. Times Square" value={newActivity.location} onChange={e => setNewActivity({...newActivity, location: e.target.value})} />
+                      <input type="text" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="e.g. Times Square" value={newActivity.location} onChange={e => setNewActivity({...newActivity, location: e.target.value})} />
                     </div>
 
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Google Maps Link</label>
-                      <input type="url" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="https://goo.gl/maps/..." value={newActivity.mapLink} onChange={e => setNewActivity({...newActivity, mapLink: e.target.value})} />
+                      <input type="url" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="https://goo.gl/maps/..." value={newActivity.mapLink} onChange={e => setNewActivity({...newActivity, mapLink: e.target.value})} />
                     </div>
 
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Additional Notes</label>
-                      <textarea className="w-full bg-[#1C1C1E] rounded-xl p-4 h-24 text-sm font-medium resize-none border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="Important details, tips, etc..." value={newActivity.note} onChange={e => setNewActivity({...newActivity, note: e.target.value})} />
+                      <textarea className="w-full bg-[#1C1C1E] rounded-xl p-4 h-24 text-base font-medium resize-none border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="Important details, tips, etc..." value={newActivity.note} onChange={e => setNewActivity({...newActivity, note: e.target.value})} />
                     </div>
                     
-                    {/* COST FIELD AT BOTTOM PER REQUEST */}
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Cost ($)</label>
-                      <input type="number" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="0" value={newActivity.cost || ''} onChange={e => setNewActivity({...newActivity, cost: Number(e.target.value)})} />
+                      <input type="number" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="0" value={newActivity.cost || ''} onChange={e => setNewActivity({...newActivity, cost: Number(e.target.value)})} />
                     </div>
 
                     <div className="pt-3 border-t border-white/10">
@@ -574,10 +583,13 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                         <h4 className="text-[9px] font-black opacity-30 uppercase">Attachments</h4>
                         <label className="flex items-center gap-1.5 cursor-pointer bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg text-[10px] font-bold border border-white/5"><Plus size={12} /> Add<input type="file" className="hidden" onChange={handleFileUpload} /></label>
                       </div>
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="flex flex-wrap gap-2">
                         {attachments.map(att => (
-                          <div key={att.id} className="flex items-center gap-1.5 bg-[#D4AF37]/10 px-2 py-1.5 rounded-lg text-[9px] font-bold border border-[#D4AF37]/20">
-                            <button onClick={() => viewAttachment(att)} className="truncate max-w-[100px] text-left hover:underline">{att.name}</button>
+                          <div key={att.id} className="relative group bg-[#D4AF37]/10 p-2 rounded-xl border border-[#D4AF37]/20 flex items-center gap-2">
+                            <div className="w-8 h-8 rounded bg-black/20 flex items-center justify-center overflow-hidden">
+                              {att.type.startsWith('image/') ? <img src={att.data} className="w-full h-full object-cover" /> : <FileText size={16} />}
+                            </div>
+                            <span className="text-[9px] font-black truncate max-w-[80px]">{att.name}</span>
                             <button onClick={() => removeAttachment(att.id)} className="text-[#D4AF37] hover:text-white"><X size={12} /></button>
                           </div>
                         ))}
@@ -592,19 +604,19 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                   <>
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Hotel Name</label>
-                      <input type="text" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="e.g. Grand Central Hotel" value={newStay.name} onChange={e => setNewStay({...newStay, name: e.target.value})} />
+                      <input type="text" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="e.g. Grand Central Hotel" value={newStay.name} onChange={e => setNewStay({...newStay, name: e.target.value})} />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Full Address</label>
-                      <input type="text" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="Street, City, State" value={newStay.location} onChange={e => setNewStay({...newStay, location: e.target.value})} />
+                      <input type="text" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="Street, City, State" value={newStay.location} onChange={e => setNewStay({...newStay, location: e.target.value})} />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Google Maps Link</label>
-                      <input type="url" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="https://goo.gl/maps/..." value={newStay.mapLink} onChange={e => setNewStay({...newStay, mapLink: e.target.value})} />
+                      <input type="url" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="https://goo.gl/maps/..." value={newStay.mapLink} onChange={e => setNewStay({...newStay, mapLink: e.target.value})} />
                     </div>
                     <div className="flex flex-col gap-4">
-                      <div><label className="text-[8px] font-black opacity-30 uppercase ml-2 mb-1 block">Check-in Date</label><input type="date" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={newStay.checkIn} onChange={e => setNewStay({...newStay, checkIn: e.target.value})} /></div>
-                      <div><label className="text-[8px] font-black opacity-30 uppercase ml-2 mb-1 block">Check-out Date</label><input type="date" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={newStay.checkOut} onChange={e => setNewStay({...newStay, checkOut: e.target.value})} /></div>
+                      <div><label className="text-[8px] font-black opacity-30 uppercase ml-2 mb-1 block">Check-in Date</label><input type="date" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={newStay.checkIn} onChange={e => setNewStay({...newStay, checkIn: e.target.value})} /></div>
+                      <div><label className="text-[8px] font-black opacity-30 uppercase ml-2 mb-1 block">Check-out Date</label><input type="date" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={newStay.checkOut} onChange={e => setNewStay({...newStay, checkOut: e.target.value})} /></div>
                     </div>
 
                     <div className="pt-3 border-t border-white/10 mt-4">
@@ -612,10 +624,13 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                         <h4 className="text-[9px] font-black opacity-30 uppercase">Attachments</h4>
                         <label className="flex items-center gap-1.5 cursor-pointer bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg text-[10px] font-bold border border-white/5"><Plus size={12} /> Add<input type="file" className="hidden" onChange={handleFileUpload} /></label>
                       </div>
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="flex flex-wrap gap-2">
                         {attachments.map(att => (
-                          <div key={att.id} className="flex items-center gap-1.5 bg-[#D4AF37]/10 px-2 py-1.5 rounded-lg text-[9px] font-bold border border-[#D4AF37]/20">
-                            <button onClick={() => viewAttachment(att)} className="truncate max-w-[100px] text-left hover:underline">{att.name}</button>
+                          <div key={att.id} className="relative group bg-[#D4AF37]/10 p-2 rounded-xl border border-[#D4AF37]/20 flex items-center gap-2">
+                            <div className="w-8 h-8 rounded bg-black/20 flex items-center justify-center overflow-hidden">
+                              {att.type.startsWith('image/') ? <img src={att.data} className="w-full h-full object-cover" /> : <FileText size={16} />}
+                            </div>
+                            <span className="text-[9px] font-black truncate max-w-[80px]">{att.name}</span>
                             <button onClick={() => removeAttachment(att.id)} className="text-[#D4AF37] hover:text-white"><X size={12} /></button>
                           </div>
                         ))}
@@ -635,34 +650,33 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Flight / Transit ID</label>
-                      <input type="text" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="e.g. DL123" value={newTransport.flightNo} onChange={e => setNewTransport({...newTransport, flightNo: e.target.value})} />
+                      <input type="text" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="e.g. DL123" value={newTransport.flightNo} onChange={e => setNewTransport({...newTransport, flightNo: e.target.value})} />
                     </div>
                     <div className="flex flex-col gap-4">
                       <div className="space-y-1">
                         <label className="text-[9px] font-black opacity-30 uppercase ml-2">Departure Point</label>
-                        <input type="text" className="bg-[#1C1C1E] rounded-xl p-4 w-full text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="From (e.g. SFO)" value={newTransport.from} onChange={e => setNewTransport({...newTransport, from: e.target.value})} />
+                        <input type="text" className="bg-[#1C1C1E] rounded-xl p-4 w-full text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="From (e.g. SFO)" value={newTransport.from} onChange={e => setNewTransport({...newTransport, from: e.target.value})} />
                       </div>
                       <div className="space-y-1">
                         <label className="text-[9px] font-black opacity-30 uppercase ml-2">Arrival Point</label>
-                        <input type="text" className="bg-[#1C1C1E] rounded-xl p-4 w-full text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="To (e.g. JFK)" value={newTransport.to} onChange={e => setNewTransport({...newTransport, to: e.target.value})} />
+                        <input type="text" className="bg-[#1C1C1E] rounded-xl p-4 w-full text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="To (e.g. JFK)" value={newTransport.to} onChange={e => setNewTransport({...newTransport, to: e.target.value})} />
                       </div>
                     </div>
                     
-                    {/* Fixed Transport Layout for iPhone - Stacked vertically */}
                     <div className="p-5 bg-[#1C1C1E] rounded-[24px] space-y-6 border border-white/5 mt-2">
                       <div className="space-y-3">
                         <label className="text-[8px] font-black opacity-30 uppercase ml-2 block">Departure Date & Time</label>
                         <div className="flex flex-col gap-2">
-                          <input type="date" className="bg-[#2C2C2E] rounded-xl p-3 text-sm font-bold w-full border-none outline-none" value={newTransport.departureDate} onChange={e => setNewTransport({...newTransport, departureDate: e.target.value})} />
-                          <input type="time" className="bg-[#2C2C2E] rounded-xl p-3 text-sm font-bold w-full border-none outline-none" value={newTransport.departureTime} onChange={e => setNewTransport({...newTransport, departureTime: e.target.value})} />
+                          <input type="date" className="bg-[#2C2C2E] rounded-xl p-3 text-base font-bold w-full border-none outline-none" value={newTransport.departureDate} onChange={e => setNewTransport({...newTransport, departureDate: e.target.value})} />
+                          <input type="time" className="bg-[#2C2C2E] rounded-xl p-3 text-base font-bold w-full border-none outline-none" value={newTransport.departureTime} onChange={e => setNewTransport({...newTransport, departureTime: e.target.value})} />
                         </div>
                       </div>
                       
                       <div className="w-full border-t border-white/5 pt-4 space-y-3">
                         <label className="text-[8px] font-black opacity-30 uppercase ml-2 block">Arrival Date & Time</label>
                         <div className="flex flex-col gap-2">
-                          <input type="date" className="bg-[#2C2C2E] rounded-xl p-3 text-sm font-bold w-full border-none outline-none" value={newTransport.arrivalDate} onChange={e => setNewTransport({...newTransport, arrivalDate: e.target.value})} />
-                          <input type="time" className="bg-[#2C2C2E] rounded-xl p-3 text-sm font-bold w-full border-none outline-none" value={newTransport.arrivalTime} onChange={e => setNewTransport({...newTransport, arrivalTime: e.target.value})} />
+                          <input type="date" className="bg-[#2C2C2E] rounded-xl p-3 text-base font-bold w-full border-none outline-none" value={newTransport.arrivalDate} onChange={e => setNewTransport({...newTransport, arrivalDate: e.target.value})} />
+                          <input type="time" className="bg-[#2C2C2E] rounded-xl p-3 text-base font-bold w-full border-none outline-none" value={newTransport.arrivalTime} onChange={e => setNewTransport({...newTransport, arrivalTime: e.target.value})} />
                         </div>
                       </div>
                     </div>
@@ -672,10 +686,13 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                         <h4 className="text-[9px] font-black opacity-30 uppercase">Attachments</h4>
                         <label className="flex items-center gap-1.5 cursor-pointer bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg text-[10px] font-bold border border-white/5"><Plus size={12} /> Add<input type="file" className="hidden" onChange={handleFileUpload} /></label>
                       </div>
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="flex flex-wrap gap-2">
                         {attachments.map(att => (
-                          <div key={att.id} className="flex items-center gap-1.5 bg-[#D4AF37]/10 px-2 py-1.5 rounded-lg text-[9px] font-bold border border-[#D4AF37]/20">
-                            <button onClick={() => viewAttachment(att)} className="truncate max-w-[100px] text-left hover:underline">{att.name}</button>
+                          <div key={att.id} className="relative group bg-[#D4AF37]/10 p-2 rounded-xl border border-[#D4AF37]/20 flex items-center gap-2">
+                            <div className="w-8 h-8 rounded bg-black/20 flex items-center justify-center overflow-hidden">
+                              {att.type.startsWith('image/') ? <img src={att.data} className="w-full h-full object-cover" /> : <FileText size={16} />}
+                            </div>
+                            <span className="text-[9px] font-black truncate max-w-[80px]">{att.name}</span>
                             <button onClick={() => removeAttachment(att.id)} className="text-[#D4AF37] hover:text-white"><X size={12} /></button>
                           </div>
                         ))}
@@ -689,7 +706,7 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-3 tracking-[0.2em]">Journey Name</label>
-                      <input type="text" className="w-full bg-[#1C1C1E] rounded-[18px] p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={editTripData.title} onChange={e => setEditTripData({...editTripData, title: e.target.value})} />
+                      <input type="text" className="w-full bg-[#1C1C1E] rounded-[18px] p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={editTripData.title} onChange={e => setEditTripData({...editTripData, title: e.target.value})} />
                     </div>
                     <div className="space-y-2 bg-[#1C1C1E] p-4 rounded-[24px] border border-white/5">
                       <div className="flex justify-between items-center mb-1"><label className="text-[9px] font-black opacity-30 uppercase tracking-[0.2em]">Banner Focus (Crop)</label><span className="text-[9px] font-black text-[#D4AF37]">{editTripData.bannerPosition}%</span></div>
@@ -699,15 +716,16 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                     <div className="flex flex-col gap-4">
                         <div className="space-y-1">
                             <label className="text-[9px] font-black opacity-30 uppercase ml-3 tracking-[0.2em]">Start Date</label>
-                            <input type="date" className="w-full bg-[#1C1C1E] rounded-[16px] p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={editTripData.startDate} onChange={e => setEditTripData({...editTripData, startDate: e.target.value})} />
+                            <input type="date" className="w-full bg-[#1C1C1E] rounded-[16px] p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={editTripData.startDate} onChange={e => setEditTripData({...editTripData, startDate: e.target.value})} />
                         </div>
                         <div className="space-y-1">
                             <label className="text-[9px] font-black opacity-30 uppercase ml-3 tracking-[0.2em]">End Date</label>
-                            <input type="date" className="w-full bg-[#1C1C1E] rounded-[16px] p-4 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={editTripData.endDate} onChange={e => setEditTripData({...editTripData, endDate: e.target.value})} />
+                            <input type="date" className="w-full bg-[#1C1C1E] rounded-[16px] p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={editTripData.endDate} onChange={e => setEditTripData({...editTripData, endDate: e.target.value})} />
                         </div>
                     </div>
                     <div className="pt-4 border-t border-white/5 space-y-3">
                       <button onClick={() => { updateTrip(trip.id, editTripData); setIsModalOpen(null); }} className="w-full py-4 bg-[#D4AF37] text-black rounded-[20px] font-black shadow-xl tracking-widest text-xs uppercase">SAVE</button>
+                      {/* Fix: changed typo 'house:opacity-100' to 'hover:opacity-100'. Also, fixing major syntax error in deleteStay above which likely caused JSX parsing phantom errors like "Cannot find name 'div'". */}
                       <button onClick={() => { if(confirm('Erase this entire adventure?')) { handleBack(); deleteTrip(trip.id); }}} className="w-full py-2 text-red-500 font-bold text-[9px] uppercase tracking-[0.2em] opacity-30 hover:opacity-100 transition-opacity">Delete Journey</button>
                     </div>
                   </div>
@@ -715,6 +733,38 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
               </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {viewingAttachment && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] bg-black/95 flex flex-col"
+          >
+            <div className="p-4 flex justify-between items-center bg-black/40 backdrop-blur-md">
+              <div className="flex items-center gap-3">
+                <button onClick={() => setViewingAttachment(null)} className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-all"><ChevronLeft size={24} /></button>
+                <div>
+                  <h4 className="text-sm font-black truncate max-w-[200px] uppercase tracking-wider">{viewingAttachment.name}</h4>
+                  <p className="text-[10px] text-white/40 font-bold uppercase">{viewingAttachment.type}</p>
+                </div>
+              </div>
+              <button onClick={() => setViewingAttachment(null)} className="p-2 bg-[#D4AF37] text-black rounded-full"><X size={20} /></button>
+            </div>
+            <div className="flex-1 overflow-hidden flex items-center justify-center p-4">
+              {viewingAttachment.type.startsWith('image/') ? (
+                <img src={viewingAttachment.data} className="max-w-full max-h-full object-contain shadow-2xl rounded-lg" alt={viewingAttachment.name} />
+              ) : (
+                <iframe src={viewingAttachment.data} className="w-full h-full rounded-lg bg-white border-none" title={viewingAttachment.name} />
+              )}
+            </div>
+            <div className="p-8 text-center bg-gradient-to-t from-black to-transparent">
+              <button onClick={() => setViewingAttachment(null)} className="px-12 py-4 bg-white/5 border border-white/10 rounded-full text-xs font-black uppercase tracking-[0.3em] hover:bg-white/10 transition-all">Back to Journey</button>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

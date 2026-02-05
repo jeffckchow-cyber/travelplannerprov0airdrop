@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -65,7 +66,7 @@ export const Budget: React.FC = () => {
                 type="number" 
                 value={tempBudget}
                 onChange={e => setTempBudget(Number(e.target.value))}
-                className="flex-1 bg-[#1C1C1E] rounded-xl px-4 py-2 text-sm font-bold border border-white/5 outline-none focus:border-[#D4AF37]"
+                className="flex-1 bg-[#1C1C1E] rounded-xl px-4 py-2 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]"
               />
               <button 
                 onClick={handleSaveBudget}
