@@ -2,10 +2,14 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   define: {
-    'process.env': process.env
+    // Specifically define process.env.API_KEY for the browser.
+    // We avoid passing the whole process.env object because it contains non-serializable Node.js data.
+    'process.env.API_KEY': JSON.stringify(process.env.API_KEY || ''),
+    'process.env': {
+      API_KEY: JSON.stringify(process.env.API_KEY || '')
+    }
   }
 });
