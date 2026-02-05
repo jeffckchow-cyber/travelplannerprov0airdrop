@@ -183,7 +183,7 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
   };
 
   const renderSubTabs = () => (
-    <div className="flex justify-around bg-[#1C1C1E] border-b border-white/10 px-1 overflow-x-auto no-scrollbar">
+    <div className="flex justify-around bg-[#1C1C1E] px-1 overflow-x-auto no-scrollbar border-b border-white/5">
       {(['itinerary', 'stay', 'transport', 'budget', 'notes'] as SubTab[]).map((tab) => (
         <button key={tab} onClick={() => setActiveSubTab(tab)} className={`flex flex-col items-center py-3 px-2 relative min-w-[60px] transition-all`}>
           <span className={`text-[9px] font-black uppercase tracking-wider ${activeSubTab === tab ? 'text-[#D4AF37]' : 'text-white/30'}`}>{tab}</span>
@@ -291,12 +291,12 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
         </div>
       </div>
 
-      {/* STICKY HEADER SECTION */}
-      <div className="sticky top-0 z-40 bg-[#1C1C1E] shadow-2xl">
+      {/* STICKY HEADER SECTION - Bundled rows together for persistence */}
+      <div className="sticky top-0 z-40 bg-[#1C1C1E] shadow-2xl border-b border-white/5">
         {renderSubTabs()}
 
         {activeSubTab === 'itinerary' && (
-          <div className="px-3 py-2.5 flex gap-1.5 overflow-x-auto no-scrollbar scroll-smooth border-b border-white/5 bg-[#1C1C1E]">
+          <div className="px-3 py-2.5 flex gap-1.5 overflow-x-auto no-scrollbar scroll-smooth bg-[#1C1C1E]">
             {trip.dailyItinerary.map((day, idx) => {
               const info = getDateInfo(day.date);
               const isActive = selectedDay === idx;
@@ -554,17 +554,17 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
 
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Time</label>
-                      <input type="time" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" value={newActivity.time} onChange={e => setNewActivity({...newActivity, time: e.target.value})} />
+                      <input type="time" className="h-14 w-full bg-[#1C1C1E] rounded-xl px-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" value={newActivity.time} onChange={e => setNewActivity({...newActivity, time: e.target.value})} />
                     </div>
 
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Destination Name</label>
-                      <input type="text" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="e.g. Times Square" value={newActivity.location} onChange={e => setNewActivity({...newActivity, location: e.target.value})} />
+                      <input type="text" className="h-14 w-full bg-[#1C1C1E] rounded-xl px-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="e.g. Times Square" value={newActivity.location} onChange={e => setNewActivity({...newActivity, location: e.target.value})} />
                     </div>
 
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Google Maps Link</label>
-                      <input type="url" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="https://goo.gl/maps/..." value={newActivity.mapLink} onChange={e => setNewActivity({...newActivity, mapLink: e.target.value})} />
+                      <input type="url" className="h-14 w-full bg-[#1C1C1E] rounded-xl px-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="https://goo.gl/maps/..." value={newActivity.mapLink} onChange={e => setNewActivity({...newActivity, mapLink: e.target.value})} />
                     </div>
 
                     <div className="space-y-1">
@@ -574,7 +574,7 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                     
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Cost ($)</label>
-                      <input type="number" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="0" value={newActivity.cost || ''} onChange={e => setNewActivity({...newActivity, cost: Number(e.target.value)})} />
+                      <input type="number" className="h-14 w-full bg-[#1C1C1E] rounded-xl px-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="0" value={newActivity.cost || ''} onChange={e => setNewActivity({...newActivity, cost: Number(e.target.value)})} />
                     </div>
 
                     <div className="pt-3 border-t border-white/10">
@@ -603,19 +603,19 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                   <>
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Hotel Name</label>
-                      <input type="text" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="e.g. Grand Central Hotel" value={newStay.name} onChange={e => setNewStay({...newStay, name: e.target.value})} />
+                      <input type="text" className="h-14 w-full bg-[#1C1C1E] rounded-xl px-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="e.g. Grand Central Hotel" value={newStay.name} onChange={e => setNewStay({...newStay, name: e.target.value})} />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Full Address</label>
-                      <input type="text" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="Street, City, State" value={newStay.location} onChange={e => setNewStay({...newStay, location: e.target.value})} />
+                      <input type="text" className="h-14 w-full bg-[#1C1C1E] rounded-xl px-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="Street, City, State" value={newStay.location} onChange={e => setNewStay({...newStay, location: e.target.value})} />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Google Maps Link</label>
-                      <input type="url" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="https://goo.gl/maps/..." value={newStay.mapLink} onChange={e => setNewStay({...newStay, mapLink: e.target.value})} />
+                      <input type="url" className="h-14 w-full bg-[#1C1C1E] rounded-xl px-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="https://goo.gl/maps/..." value={newStay.mapLink} onChange={e => setNewStay({...newStay, mapLink: e.target.value})} />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-1"><label className="text-[8px] font-black opacity-30 uppercase ml-2 mb-1 block">Check-in Date</label><input type="date" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" value={newStay.checkIn} onChange={e => setNewStay({...newStay, checkIn: e.target.value})} /></div>
-                      <div className="space-y-1"><label className="text-[8px] font-black opacity-30 uppercase ml-2 mb-1 block">Check-out Date</label><input type="date" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" value={newStay.checkOut} onChange={e => setNewStay({...newStay, checkOut: e.target.value})} /></div>
+                      <div className="space-y-1"><label className="text-[8px] font-black opacity-30 uppercase ml-2 mb-1 block">Check-in Date</label><input type="date" className="h-14 w-full bg-[#1C1C1E] rounded-xl px-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" value={newStay.checkIn} onChange={e => setNewStay({...newStay, checkIn: e.target.value})} /></div>
+                      <div className="space-y-1"><label className="text-[8px] font-black opacity-30 uppercase ml-2 mb-1 block">Check-out Date</label><input type="date" className="h-14 w-full bg-[#1C1C1E] rounded-xl px-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" value={newStay.checkOut} onChange={e => setNewStay({...newStay, checkOut: e.target.value})} /></div>
                     </div>
 
                     <div className="pt-3 border-t border-white/10 mt-4">
@@ -649,16 +649,16 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Flight / Transit ID</label>
-                      <input type="text" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="e.g. DL123" value={newTransport.flightNo} onChange={e => setNewTransport({...newTransport, flightNo: e.target.value})} />
+                      <input type="text" className="h-14 w-full bg-[#1C1C1E] rounded-xl px-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="e.g. DL123" value={newTransport.flightNo} onChange={e => setNewTransport({...newTransport, flightNo: e.target.value})} />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1">
                         <label className="text-[9px] font-black opacity-30 uppercase ml-2">Departure Point</label>
-                        <input type="text" className="bg-[#1C1C1E] rounded-xl p-4 w-full text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="From (e.g. SFO)" value={newTransport.from} onChange={e => setNewTransport({...newTransport, from: e.target.value})} />
+                        <input type="text" className="h-14 w-full bg-[#1C1C1E] rounded-xl px-4 w-full text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="From (e.g. SFO)" value={newTransport.from} onChange={e => setNewTransport({...newTransport, from: e.target.value})} />
                       </div>
                       <div className="space-y-1">
                         <label className="text-[9px] font-black opacity-30 uppercase ml-2">Arrival Point</label>
-                        <input type="text" className="bg-[#1C1C1E] rounded-xl p-4 w-full text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="To (e.g. JFK)" value={newTransport.to} onChange={e => setNewTransport({...newTransport, to: e.target.value})} />
+                        <input type="text" className="h-14 w-full bg-[#1C1C1E] rounded-xl px-4 w-full text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="To (e.g. JFK)" value={newTransport.to} onChange={e => setNewTransport({...newTransport, to: e.target.value})} />
                       </div>
                     </div>
                     
@@ -666,16 +666,16 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                       <div className="space-y-2 p-3 bg-[#1C1C1E] rounded-2xl border border-white/5">
                         <label className="text-[8px] font-black opacity-30 uppercase ml-2 block">Departure</label>
                         <div className="flex gap-2">
-                          <input type="date" className="flex-1 min-w-0 bg-[#2C2C2E] rounded-xl p-3 text-base font-bold border-none outline-none" value={newTransport.departureDate} onChange={e => setNewTransport({...newTransport, departureDate: e.target.value})} />
-                          <input type="time" className="w-[100px] bg-[#2C2C2E] rounded-xl p-3 text-base font-bold border-none outline-none" value={newTransport.departureTime} onChange={e => setNewTransport({...newTransport, departureTime: e.target.value})} />
+                          <input type="date" className="h-14 flex-1 min-w-0 bg-[#2C2C2E] rounded-xl px-3 text-base font-bold border-none outline-none" value={newTransport.departureDate} onChange={e => setNewTransport({...newTransport, departureDate: e.target.value})} />
+                          <input type="time" className="h-14 w-[100px] bg-[#2C2C2E] rounded-xl px-3 text-base font-bold border-none outline-none" value={newTransport.departureTime} onChange={e => setNewTransport({...newTransport, departureTime: e.target.value})} />
                         </div>
                       </div>
                       
                       <div className="space-y-2 p-3 bg-[#1C1C1E] rounded-2xl border border-white/5">
                         <label className="text-[8px] font-black opacity-30 uppercase ml-2 block">Arrival</label>
                         <div className="flex gap-2">
-                          <input type="date" className="flex-1 min-w-0 bg-[#2C2C2E] rounded-xl p-3 text-base font-bold border-none outline-none" value={newTransport.arrivalDate} onChange={e => setNewTransport({...newTransport, arrivalDate: e.target.value})} />
-                          <input type="time" className="w-[100px] bg-[#2C2C2E] rounded-xl p-3 text-base font-bold border-none outline-none" value={newTransport.arrivalTime} onChange={e => setNewTransport({...newTransport, arrivalTime: e.target.value})} />
+                          <input type="date" className="h-14 flex-1 min-w-0 bg-[#2C2C2E] rounded-xl px-3 text-base font-bold border-none outline-none" value={newTransport.arrivalDate} onChange={e => setNewTransport({...newTransport, arrivalDate: e.target.value})} />
+                          <input type="time" className="h-14 w-[100px] bg-[#2C2C2E] rounded-xl px-3 text-base font-bold border-none outline-none" value={newTransport.arrivalTime} onChange={e => setNewTransport({...newTransport, arrivalTime: e.target.value})} />
                         </div>
                       </div>
                     </div>
@@ -705,7 +705,7 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-3 tracking-[0.2em]">Journey Name</label>
-                      <input type="text" className="w-full bg-[#1C1C1E] rounded-[18px] p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" value={editTripData.title} onChange={e => setEditTripData({...editTripData, title: e.target.value})} />
+                      <input type="text" className="h-14 w-full bg-[#1C1C1E] rounded-[18px] px-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" value={editTripData.title} onChange={e => setEditTripData({...editTripData, title: e.target.value})} />
                     </div>
                     <div className="space-y-2 bg-[#1C1C1E] p-4 rounded-[24px] border border-white/5">
                       <div className="flex justify-between items-center mb-1"><label className="text-[9px] font-black opacity-30 uppercase tracking-[0.2em]">Banner Focus (Crop)</label><span className="text-[9px] font-black text-[#D4AF37]">{editTripData.bannerPosition}%</span></div>
@@ -715,11 +715,11 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                     <div className="flex flex-col gap-4">
                         <div className="space-y-1">
                             <label className="text-[9px] font-black opacity-30 uppercase ml-3 tracking-[0.2em]">Start Date</label>
-                            <input type="date" className="w-full bg-[#1C1C1E] rounded-[16px] p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" value={editTripData.startDate} onChange={e => setEditTripData({...editTripData, startDate: e.target.value})} />
+                            <input type="date" className="h-14 w-full bg-[#1C1C1E] rounded-[16px] px-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" value={editTripData.startDate} onChange={e => setEditTripData({...editTripData, startDate: e.target.value})} />
                         </div>
                         <div className="space-y-1">
                             <label className="text-[9px] font-black opacity-30 uppercase ml-3 tracking-[0.2em]">End Date</label>
-                            <input type="date" className="w-full bg-[#1C1C1E] rounded-[16px] p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" value={editTripData.endDate} onChange={e => setEditTripData({...editTripData, endDate: e.target.value})} />
+                            <input type="date" className="h-14 w-full bg-[#1C1C1E] rounded-[16px] px-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" value={editTripData.endDate} onChange={e => setEditTripData({...editTripData, endDate: e.target.value})} />
                         </div>
                     </div>
                     <div className="pt-4 border-t border-white/5 space-y-3">
