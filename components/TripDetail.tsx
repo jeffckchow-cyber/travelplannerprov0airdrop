@@ -235,8 +235,8 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
     return parts.map((part, i) => {
       if (part.match(urlRegex)) {
         return (
-          <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-[#D4AF37] underline inline-flex items-center gap-1">
-            {part} <ExternalLink size={10} />
+          <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-[#D4AF37] underline inline-flex items-center gap-1 break-all">
+            {part} <ExternalLink size={10} className="shrink-0" />
           </a>
         );
       }
@@ -312,7 +312,7 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
       </div>
 
       {/* CONTENT AREA */}
-      <div className="flex-1 p-4 max-w-2xl mx-auto pb-24 w-full">
+      <div className="flex-1 p-4 max-w-2xl mx-auto pb-24 w-full overflow-x-hidden">
           {activeSubTab === 'itinerary' && (
             <div className="space-y-4">
               <div className="flex justify-between items-center mb-1">
@@ -452,8 +452,7 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                         {stay.mapLink && (
                           <a href={stay.mapLink} target="_blank" rel="noopener" onClick={e => e.stopPropagation()} className="p-2 text-[#D4AF37] hover:scale-110 transition-all opacity-0 group-hover:opacity-100"><MapPin size={18} /></a>
                         )}
-                        {/* Fix: stayId was not defined, use stay.id. Corrected syntax error by removing the malformed ternary. */}
-                        <button onClick={(e) => { e.stopPropagation(); deleteStay(trip.id, stay.id); }} className="p-2 text-red-500/20 text-red-500 rounded-lg opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
+                        <button onClick={(e) => { e.stopPropagation(); deleteStay(trip.id, stay.id); }} className="p-2 text-red-500/20 text-red-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all"><Trash2 size={16} /></button>
                      </div>
                    </div>
                    {renderAttachmentPreviews(stay.attachments)}
@@ -524,7 +523,7 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                     onChange={(e) => updateNotes(trip.id, e.target.value)} 
                   />
                 ) : (
-                  <div className="w-full min-h-[400px] bg-[#2C2C2E] border border-white/5 rounded-[24px] p-6 text-white/80 text-base font-medium leading-relaxed whitespace-pre-wrap">
+                  <div className="w-full min-h-[400px] bg-[#2C2C2E] border border-white/5 rounded-[24px] p-6 text-white/80 text-base font-medium leading-relaxed whitespace-pre-wrap break-words overflow-wrap-anywhere overflow-x-hidden">
                     {trip.notes ? renderLinkifiedText(trip.notes) : <span className="opacity-30 italic">No notes added. Switch to Edit Mode to start writing.</span>}
                   </div>
                 )}
@@ -537,7 +536,7 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
         {isModalOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-3">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsModalOpen(null)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
-            <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }} className="relative bg-[#2C2C2E] w-full max-w-md rounded-[40px] p-6 max-h-[85vh] overflow-y-auto no-scrollbar border border-white/10 shadow-3xl">
+            <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }} className="relative bg-[#2C2C2E] w-full max-w-md rounded-[40px] p-4 md:p-6 max-h-[85vh] overflow-y-auto no-scrollbar border border-white/10 shadow-3xl">
               
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-base font-black uppercase tracking-[0.2em] text-[#D4AF37]">{getModalTitle()}</h3>
@@ -555,27 +554,27 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
 
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Time</label>
-                      <input type="time" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={newActivity.time} onChange={e => setNewActivity({...newActivity, time: e.target.value})} />
+                      <input type="time" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" value={newActivity.time} onChange={e => setNewActivity({...newActivity, time: e.target.value})} />
                     </div>
 
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Destination Name</label>
-                      <input type="text" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="e.g. Times Square" value={newActivity.location} onChange={e => setNewActivity({...newActivity, location: e.target.value})} />
+                      <input type="text" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="e.g. Times Square" value={newActivity.location} onChange={e => setNewActivity({...newActivity, location: e.target.value})} />
                     </div>
 
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Google Maps Link</label>
-                      <input type="url" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="https://goo.gl/maps/..." value={newActivity.mapLink} onChange={e => setNewActivity({...newActivity, mapLink: e.target.value})} />
+                      <input type="url" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="https://goo.gl/maps/..." value={newActivity.mapLink} onChange={e => setNewActivity({...newActivity, mapLink: e.target.value})} />
                     </div>
 
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Additional Notes</label>
-                      <textarea className="w-full bg-[#1C1C1E] rounded-xl p-4 h-24 text-base font-medium resize-none border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="Important details, tips, etc..." value={newActivity.note} onChange={e => setNewActivity({...newActivity, note: e.target.value})} />
+                      <textarea className="w-full bg-[#1C1C1E] rounded-xl p-4 h-24 text-base font-medium resize-none border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="Important details, tips, etc..." value={newActivity.note} onChange={e => setNewActivity({...newActivity, note: e.target.value})} />
                     </div>
                     
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Cost ($)</label>
-                      <input type="number" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="0" value={newActivity.cost || ''} onChange={e => setNewActivity({...newActivity, cost: Number(e.target.value)})} />
+                      <input type="number" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="0" value={newActivity.cost || ''} onChange={e => setNewActivity({...newActivity, cost: Number(e.target.value)})} />
                     </div>
 
                     <div className="pt-3 border-t border-white/10">
@@ -604,19 +603,19 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                   <>
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Hotel Name</label>
-                      <input type="text" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="e.g. Grand Central Hotel" value={newStay.name} onChange={e => setNewStay({...newStay, name: e.target.value})} />
+                      <input type="text" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="e.g. Grand Central Hotel" value={newStay.name} onChange={e => setNewStay({...newStay, name: e.target.value})} />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Full Address</label>
-                      <input type="text" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="Street, City, State" value={newStay.location} onChange={e => setNewStay({...newStay, location: e.target.value})} />
+                      <input type="text" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="Street, City, State" value={newStay.location} onChange={e => setNewStay({...newStay, location: e.target.value})} />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Google Maps Link</label>
-                      <input type="url" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="https://goo.gl/maps/..." value={newStay.mapLink} onChange={e => setNewStay({...newStay, mapLink: e.target.value})} />
+                      <input type="url" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="https://goo.gl/maps/..." value={newStay.mapLink} onChange={e => setNewStay({...newStay, mapLink: e.target.value})} />
                     </div>
-                    <div className="flex flex-col gap-4">
-                      <div><label className="text-[8px] font-black opacity-30 uppercase ml-2 mb-1 block">Check-in Date</label><input type="date" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={newStay.checkIn} onChange={e => setNewStay({...newStay, checkIn: e.target.value})} /></div>
-                      <div><label className="text-[8px] font-black opacity-30 uppercase ml-2 mb-1 block">Check-out Date</label><input type="date" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={newStay.checkOut} onChange={e => setNewStay({...newStay, checkOut: e.target.value})} /></div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1"><label className="text-[8px] font-black opacity-30 uppercase ml-2 mb-1 block">Check-in Date</label><input type="date" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" value={newStay.checkIn} onChange={e => setNewStay({...newStay, checkIn: e.target.value})} /></div>
+                      <div className="space-y-1"><label className="text-[8px] font-black opacity-30 uppercase ml-2 mb-1 block">Check-out Date</label><input type="date" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" value={newStay.checkOut} onChange={e => setNewStay({...newStay, checkOut: e.target.value})} /></div>
                     </div>
 
                     <div className="pt-3 border-t border-white/10 mt-4">
@@ -650,33 +649,33 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-2">Flight / Transit ID</label>
-                      <input type="text" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="e.g. DL123" value={newTransport.flightNo} onChange={e => setNewTransport({...newTransport, flightNo: e.target.value})} />
+                      <input type="text" className="w-full bg-[#1C1C1E] rounded-xl p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="e.g. DL123" value={newTransport.flightNo} onChange={e => setNewTransport({...newTransport, flightNo: e.target.value})} />
                     </div>
-                    <div className="flex flex-col gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1">
                         <label className="text-[9px] font-black opacity-30 uppercase ml-2">Departure Point</label>
-                        <input type="text" className="bg-[#1C1C1E] rounded-xl p-4 w-full text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="From (e.g. SFO)" value={newTransport.from} onChange={e => setNewTransport({...newTransport, from: e.target.value})} />
+                        <input type="text" className="bg-[#1C1C1E] rounded-xl p-4 w-full text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="From (e.g. SFO)" value={newTransport.from} onChange={e => setNewTransport({...newTransport, from: e.target.value})} />
                       </div>
                       <div className="space-y-1">
                         <label className="text-[9px] font-black opacity-30 uppercase ml-2">Arrival Point</label>
-                        <input type="text" className="bg-[#1C1C1E] rounded-xl p-4 w-full text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" placeholder="To (e.g. JFK)" value={newTransport.to} onChange={e => setNewTransport({...newTransport, to: e.target.value})} />
+                        <input type="text" className="bg-[#1C1C1E] rounded-xl p-4 w-full text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" placeholder="To (e.g. JFK)" value={newTransport.to} onChange={e => setNewTransport({...newTransport, to: e.target.value})} />
                       </div>
                     </div>
                     
-                    <div className="p-5 bg-[#1C1C1E] rounded-[24px] space-y-6 border border-white/5 mt-2">
-                      <div className="space-y-3">
-                        <label className="text-[8px] font-black opacity-30 uppercase ml-2 block">Departure Date & Time</label>
-                        <div className="flex flex-col gap-2">
-                          <input type="date" className="bg-[#2C2C2E] rounded-xl p-3 text-base font-bold w-full border-none outline-none" value={newTransport.departureDate} onChange={e => setNewTransport({...newTransport, departureDate: e.target.value})} />
-                          <input type="time" className="bg-[#2C2C2E] rounded-xl p-3 text-base font-bold w-full border-none outline-none" value={newTransport.departureTime} onChange={e => setNewTransport({...newTransport, departureTime: e.target.value})} />
+                    <div className="space-y-4 pt-2">
+                      <div className="space-y-2 p-3 bg-[#1C1C1E] rounded-2xl border border-white/5">
+                        <label className="text-[8px] font-black opacity-30 uppercase ml-2 block">Departure</label>
+                        <div className="flex gap-2">
+                          <input type="date" className="flex-1 min-w-0 bg-[#2C2C2E] rounded-xl p-3 text-base font-bold border-none outline-none" value={newTransport.departureDate} onChange={e => setNewTransport({...newTransport, departureDate: e.target.value})} />
+                          <input type="time" className="w-[100px] bg-[#2C2C2E] rounded-xl p-3 text-base font-bold border-none outline-none" value={newTransport.departureTime} onChange={e => setNewTransport({...newTransport, departureTime: e.target.value})} />
                         </div>
                       </div>
                       
-                      <div className="w-full border-t border-white/5 pt-4 space-y-3">
-                        <label className="text-[8px] font-black opacity-30 uppercase ml-2 block">Arrival Date & Time</label>
-                        <div className="flex flex-col gap-2">
-                          <input type="date" className="bg-[#2C2C2E] rounded-xl p-3 text-base font-bold w-full border-none outline-none" value={newTransport.arrivalDate} onChange={e => setNewTransport({...newTransport, arrivalDate: e.target.value})} />
-                          <input type="time" className="bg-[#2C2C2E] rounded-xl p-3 text-base font-bold w-full border-none outline-none" value={newTransport.arrivalTime} onChange={e => setNewTransport({...newTransport, arrivalTime: e.target.value})} />
+                      <div className="space-y-2 p-3 bg-[#1C1C1E] rounded-2xl border border-white/5">
+                        <label className="text-[8px] font-black opacity-30 uppercase ml-2 block">Arrival</label>
+                        <div className="flex gap-2">
+                          <input type="date" className="flex-1 min-w-0 bg-[#2C2C2E] rounded-xl p-3 text-base font-bold border-none outline-none" value={newTransport.arrivalDate} onChange={e => setNewTransport({...newTransport, arrivalDate: e.target.value})} />
+                          <input type="time" className="w-[100px] bg-[#2C2C2E] rounded-xl p-3 text-base font-bold border-none outline-none" value={newTransport.arrivalTime} onChange={e => setNewTransport({...newTransport, arrivalTime: e.target.value})} />
                         </div>
                       </div>
                     </div>
@@ -706,7 +705,7 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <label className="text-[9px] font-black opacity-30 uppercase ml-3 tracking-[0.2em]">Journey Name</label>
-                      <input type="text" className="w-full bg-[#1C1C1E] rounded-[18px] p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={editTripData.title} onChange={e => setEditTripData({...editTripData, title: e.target.value})} />
+                      <input type="text" className="w-full bg-[#1C1C1E] rounded-[18px] p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" value={editTripData.title} onChange={e => setEditTripData({...editTripData, title: e.target.value})} />
                     </div>
                     <div className="space-y-2 bg-[#1C1C1E] p-4 rounded-[24px] border border-white/5">
                       <div className="flex justify-between items-center mb-1"><label className="text-[9px] font-black opacity-30 uppercase tracking-[0.2em]">Banner Focus (Crop)</label><span className="text-[9px] font-black text-[#D4AF37]">{editTripData.bannerPosition}%</span></div>
@@ -716,16 +715,15 @@ export const TripDetail: React.FC<TripDetailProps> = ({ onBack }) => {
                     <div className="flex flex-col gap-4">
                         <div className="space-y-1">
                             <label className="text-[9px] font-black opacity-30 uppercase ml-3 tracking-[0.2em]">Start Date</label>
-                            <input type="date" className="w-full bg-[#1C1C1E] rounded-[16px] p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={editTripData.startDate} onChange={e => setEditTripData({...editTripData, startDate: e.target.value})} />
+                            <input type="date" className="w-full bg-[#1C1C1E] rounded-[16px] p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" value={editTripData.startDate} onChange={e => setEditTripData({...editTripData, startDate: e.target.value})} />
                         </div>
                         <div className="space-y-1">
                             <label className="text-[9px] font-black opacity-30 uppercase ml-3 tracking-[0.2em]">End Date</label>
-                            <input type="date" className="w-full bg-[#1C1C1E] rounded-[16px] p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37]" value={editTripData.endDate} onChange={e => setEditTripData({...editTripData, endDate: e.target.value})} />
+                            <input type="date" className="w-full bg-[#1C1C1E] rounded-[16px] p-4 text-base font-bold border border-white/5 outline-none focus:border-[#D4AF37] box-border" value={editTripData.endDate} onChange={e => setEditTripData({...editTripData, endDate: e.target.value})} />
                         </div>
                     </div>
                     <div className="pt-4 border-t border-white/5 space-y-3">
                       <button onClick={() => { updateTrip(trip.id, editTripData); setIsModalOpen(null); }} className="w-full py-4 bg-[#D4AF37] text-black rounded-[20px] font-black shadow-xl tracking-widest text-xs uppercase">SAVE</button>
-                      {/* Fix: changed typo 'house:opacity-100' to 'hover:opacity-100'. Also, fixing major syntax error in deleteStay above which likely caused JSX parsing phantom errors like "Cannot find name 'div'". */}
                       <button onClick={() => { if(confirm('Erase this entire adventure?')) { handleBack(); deleteTrip(trip.id); }}} className="w-full py-2 text-red-500 font-bold text-[9px] uppercase tracking-[0.2em] opacity-30 hover:opacity-100 transition-opacity">Delete Journey</button>
                     </div>
                   </div>
